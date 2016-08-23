@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="      
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd   
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd   
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd   
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd ">
+    
+    <!-- Properties file -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- Datasource -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  
+        destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	
+	<!-- Hibernate SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!--指定路径扫描 注解  -->
+		<property name="packagesToScan">
+            <list>
+                <value>com.wlh.wpd.model</value>
+            </list>
+        </property>
+        <!--指定映射对象  -->
+		<!-- <property name="annotatedClasses"><list><value>com.wlh.wpd.entity.User</value></list></property> -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.hbm2ddl.auto">none</prop>
+				<!-- <prop key="hibernate.connection.provider_class">${hibernate.poolprovider}</prop> 
+				<prop key="hibernate.connection.driver_class">${jdbc.driverClassName}</prop>
+				<prop key="hibernate.connection.username">${jdbc.username}</prop>
+				<prop key="hibernate.connection.password">${jdbc.password}</prop>
+				<prop key="hibernate.connection.url">${jdbc.url}</prop>-->
+				<prop key="hibernate.c3p0.max_size">${hibernate.c3p0.max_size}</prop>
+				<prop key="hibernate.c3p0.timeout">${hibernate.c3p0.timeout}</prop>
+				<prop key="hibernate.c3p0.max_statements">${hibernate.c3p0.max_statements}</prop>
+				<prop key="hibernate.c3p0.acquire_increment">${hibernate.c3p0.acquire_increment}</prop>
+				<prop key="hibernate.c3p0.validate">${hibernate.c3p0.validate}</prop>
+				<prop key="hibernate.c3p0.idle_test_period">${hibernate.c3p0.idle_test_period}</prop>
+				<prop key="hibernate.use_outer_join">true</prop>
+				<prop key="hibernate.max_fetch_depth">100</prop>
+				<prop key="hibernate.cglib.use_reflection_optimizer">true</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- 用注解来实现事务管理 ,强制使用CGLIB生成代理需要设置proxy-target-class为true-->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+	
+	<!-- 配置事务管理器 -->  
+    <bean id="transactionManager"  
+        class="org.springframework.orm.hibernate5.HibernateTransactionManager">  
+        <property name="sessionFactory" ref="sessionFactory" />  
+    </bean>  
+  
+    <!-- 配置事务通知属性 -->  
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">  
+        <!-- 定义事务传播属性 -->  
+        <tx:attributes>  
+            <tx:method name="insert*" propagation="REQUIRED" />  
+            <tx:method name="update*" propagation="REQUIRED" />  
+            <tx:method name="edit*" propagation="REQUIRED" />  
+            <tx:method name="save*" propagation="REQUIRED" />  
+            <tx:method name="add*" propagation="REQUIRED" />  
+            <tx:method name="new*" propagation="REQUIRED" />  
+            <tx:method name="set*" propagation="REQUIRED" />  
+            <tx:method name="remove*" propagation="REQUIRED" />  
+            <tx:method name="delete*" propagation="REQUIRED" />  
+            <tx:method name="change*" propagation="REQUIRED" />  
+            <tx:method name="get*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="find*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="load*" propagation="REQUIRED" read-only="true" />  
+            <tx:method name="*" propagation="REQUIRED" read-only="true" />  
+        </tx:attributes>  
+    </tx:advice>
+	
+	<!-- 配置事务切面 -->
+	<!-- aop代理设置，默认是注入接口要加上proxy-target-class="true" 通过AOP配置提供事务增强，让service包下所有Bean的所有方法拥有事务-->  
+    <aop:config proxy-target-class="true">  
+        <aop:pointcut id="serviceOperation"  
+            expression="execution(* com.wlh.wpd.service..*.*(..))" />  
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceOperation" />  
+    </aop:config>  
+  
+    <!-- 自动加载构建bean -->  
+    <!-- <context:component-scan base-package="com.wlh.wpd" /> -->  
+    <context:component-scan base-package="com.wlh.wpd">
+        <context:exclude-filter type="annotation" 
+            expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" 
+            expression="org.springframework.web.bind.annotation.ControllerAdvice"/>        
+    </context:component-scan>
+    
+</beans>
