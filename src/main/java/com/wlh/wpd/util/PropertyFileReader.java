@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -22,8 +23,7 @@ public class PropertyFileReader
 {
     private static String PROPERTY_FILE = "system.properties";
 
-    private static final Logger logger = Logger
-            .getLogger(PropertyFileReader.class);
+    private static final Logger logger = LogManager.getLogger(PropertyFileReader.class);
 
     /**
      * 根据Key 读取Value
