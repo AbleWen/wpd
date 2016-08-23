@@ -233,29 +233,6 @@ public abstract class HibernateRepository<T extends Serializable> extends
 		// 查询条件处理
 		List<QueryCondition> condList = querySpec.getCondList();
 		
-		
-		//区域过滤
-//		if(null!=areaHolderSet){
-//			//查询 areaHolderSet 需至少一个非null元素
-//			if(CollectionUtils.isEmpty(areaHolderSet) 
-//					|| (1==areaHolderSet.size() && areaHolderSet.contains(null))){
-//				AreaHolder ah = new AreaHolder();
-//				ah.setId(-1);
-//				areaHolderSet.add(ah);
-//			}
-//			
-//			//查询无区域数据 && 所属区域数据
-//			if(areaHolderSet.contains(null)){
-//				//null元素用于标记查询无区域数据
-//				areaHolderSet.remove(null);
-//				criteria.add(Restrictions.or(Restrictions.isNull("areaHolder"), Restrictions.in("areaHolder", areaHolderSet)));
-//			}
-//			//查询所属区域数据
-//			else{
-//				criteria.add(Restrictions.in("areaHolder", areaHolderSet));
-//			}
-//		}
-
 		for (QueryCondition cond : condList) {
 			firstSwitch(cond, criteria);
 		}
